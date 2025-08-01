@@ -155,6 +155,15 @@ sudo pip3 install zeep gevent psycopg2-binary --break-system-packages
 echo "=== Installing additional dependencies ... ==="
 sudo pip3 install gevent-websocket greenlet --break-system-packages
 
+# Force reinstall gevent to ensure it's properly installed
+echo "=== Force reinstalling gevent ... ==="
+sudo pip3 uninstall gevent -y --break-system-packages || true
+sudo pip3 install gevent==23.9.1 --break-system-packages
+
+# Install system-level gevent dependencies
+echo "=== Installing system dependencies for gevent ... ==="
+sudo apt install -y libev-dev python3-dev build-essential
+
 # Create custom addons directory
 echo "Creating custom addons directory..."
 sudo mkdir $OE_HOME/custom
@@ -232,8 +241,23 @@ echo "=== Verifying Python dependencies ... ==="
 python3 -c "import gevent; print('gevent installed successfully')" || echo "gevent installation failed"
 python3 -c "import psycopg2; print('psycopg2 installed successfully')" || echo "psycopg2 installation failed"
 
+# Additional verification and troubleshooting
+echo "=== Checking Python path and gevent installation ... ==="
+python3 -c "import sys; print('Python path:', sys.path)"
+python3 -c "import gevent; print('gevent version:', gevent.__version__)" || echo "gevent version check failed"
+
 sudo systemctl enable --now $OE_USER.service
 sudo systemctl start $OE_USER.service
+
+# Wait a moment and check if service started successfully
+echo "=== Waiting for service to start ... ==="
+sleep 5
+if sudo systemctl is-active --quiet $OE_USER.service; then
+    echo "Odoo service started successfully"
+else
+    echo "Odoo service failed to start. Checking logs..."
+    sudo journalctl -u $OE_USER.service --no-pager -n 20
+fi
 
 #--------------------------------------------------
 # Install Nginx if needed
