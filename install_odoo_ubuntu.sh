@@ -148,6 +148,9 @@ echo "=== Cloning Odoo 18 from GitHub ... ==="
 sudo git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $OE_HOME_EXT/
 sudo pip3 install -r /$OE_HOME_EXT/requirements.txt --break-system-packages
 
+echo "=== Installing extra Python dependencies ... ==="
+sudo pip3 install zeep --break-system-packages
+
 # Create custom addons directory
 echo "Creating custom addons directory..."
 sudo mkdir $OE_HOME/custom
