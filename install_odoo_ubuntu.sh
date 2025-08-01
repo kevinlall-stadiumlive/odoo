@@ -149,7 +149,11 @@ sudo git clone --depth 1 --branch $OE_VERSION https://www.github.com/odoo/odoo $
 sudo pip3 install -r /$OE_HOME_EXT/requirements.txt --break-system-packages
 
 echo "=== Installing extra Python dependencies ... ==="
-sudo pip3 install zeep --break-system-packages
+sudo pip3 install zeep gevent psycopg2-binary --break-system-packages
+
+# Install additional dependencies that might be missing
+echo "=== Installing additional dependencies ... ==="
+sudo pip3 install gevent-websocket greenlet --break-system-packages
 
 # Create custom addons directory
 echo "Creating custom addons directory..."
@@ -222,6 +226,11 @@ sudo chown root: /lib/systemd/system/$OE_USER.service
 # Reload systemd and start Odoo service
 echo "=== Reloading systemd daemon ... ==="
 sudo systemctl daemon-reload
+
+# Verify Python dependencies are installed
+echo "=== Verifying Python dependencies ... ==="
+python3 -c "import gevent; print('gevent installed successfully')" || echo "gevent installation failed"
+python3 -c "import psycopg2; print('psycopg2 installed successfully')" || echo "psycopg2 installation failed"
 
 sudo systemctl enable --now $OE_USER.service
 sudo systemctl start $OE_USER.service
